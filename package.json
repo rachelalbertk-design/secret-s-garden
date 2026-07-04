@@ -1,0 +1,18 @@
+{
+  "name": "the-secrets-garden-prototype",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A local-only fairy garden journaling, tarot, astrology, and ritual prototype.",
+  "scripts": {
+    "check": "node --check app.js",
+    "serve": "python -m http.server 4188"
+  },
+  "keywords": [
+    "prototype",
+    "tarot",
+    "journaling",
+    "astrology",
+    "local-first",
+    "static-site"
+  ]
+}

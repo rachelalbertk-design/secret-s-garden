@@ -1,0 +1,26 @@
+.agents/
+.codex/
+work/
+outputs/
+write-test-node.txt
+
+# Dependencies and generated folders
+node_modules/
+dist/
+build/
+.cache/
+
+# Local editor files
+.vscode/
+.idea/
+
+# Local operating-system files
+.DS_Store
+Thumbs.db
+
+# Logs and local scratch output
+*.log
+*.tmp
+
+# Private local save exports
+the-secrets-garden-local-save-*.json
