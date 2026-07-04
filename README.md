@@ -39,12 +39,10 @@ npm run check
 
 This repository is ready to publish from the root folder:
 
-1. Create a new GitHub repository.
-2. Add these files to the repository.
-3. In GitHub, go to `Settings > Pages`.
-4. Choose `Deploy from a branch`.
-5. Select the `main` branch and `/root`.
-6. Save, then wait for GitHub Pages to publish.
+1. In GitHub, go to `Settings > Pages`.
+2. Choose `Deploy from a branch`.
+3. Select the `main` branch and `/root`.
+4. Save, then wait for GitHub Pages to publish.
 
 The included `.nojekyll` file helps GitHub Pages serve the static files as-is.
 
