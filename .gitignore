@@ -1,0 +1,12 @@
+.agents/
+.codex/
+work/
+write-test-node.txt
+
+# Local operating-system files
+.DS_Store
+Thumbs.db
+
+# Logs and local scratch output
+*.log
+*.tmp
