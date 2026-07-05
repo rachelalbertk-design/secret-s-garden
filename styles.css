@@ -9655,3 +9655,146 @@ textarea::placeholder {
     animation: none !important;
   }
 }
+
+/* Sunlit canopy tone: brighter greens, like light passing through leaves. */
+:root {
+  --sunleaf: #bfe88a;
+  --leaf-bright: #6fbf68;
+  --leaf-moss: #2f6f45;
+  --leaf-deep: #153a27;
+  --sunbeam: rgba(244, 214, 126, 0.34);
+  --canopy-glow: rgba(156, 224, 112, 0.2);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 42% -10%, rgba(191, 232, 138, 0.24), transparent 42%),
+    radial-gradient(ellipse at 82% 18%, rgba(244, 214, 126, 0.16), transparent 38%),
+    linear-gradient(180deg, #1e4f34 0%, #143b2a 45%, #081611 100%);
+}
+
+.shell,
+.story-screen {
+  background:
+    linear-gradient(180deg, rgba(66, 136, 74, 0.28), rgba(10, 28, 18, 0.82)),
+    radial-gradient(ellipse at 22% 4%, rgba(191, 232, 138, 0.18), transparent 38%),
+    url("assets/garden-vista.svg") center / cover fixed no-repeat,
+    #1b4a31;
+}
+
+.shell::before {
+  background:
+    linear-gradient(112deg, transparent 0 12%, rgba(244, 214, 126, 0.13) 18%, transparent 28%),
+    linear-gradient(128deg, transparent 0 44%, rgba(191, 232, 138, 0.13) 51%, transparent 61%),
+    radial-gradient(ellipse at 50% 100%, rgba(111, 191, 104, 0.32), transparent 54%),
+    linear-gradient(180deg, rgba(191, 232, 138, 0.08), rgba(0, 0, 0, 0.28));
+  opacity: 0.95;
+}
+
+.topbar,
+.content-panel,
+.side-panel,
+.dialogue-panel,
+.book-page,
+.ritual-card,
+.journal-door,
+.journal-shelf-page,
+.room-hero {
+  border-color: rgba(191, 232, 138, 0.18);
+  background:
+    linear-gradient(180deg, rgba(222, 246, 177, 0.095), rgba(255, 247, 232, 0.03)),
+    rgba(13, 39, 25, 0.78);
+}
+
+.brand-mark,
+.garden-return-button,
+.garden-home-button,
+.primary {
+  background: linear-gradient(180deg, #f4dc8d, #bfe88a 54%, #7fbf6a);
+  border-color: rgba(255, 247, 232, 0.58);
+}
+
+button:hover,
+button:focus-visible,
+.ghost:hover,
+.secondary:hover {
+  background: rgba(62, 111, 57, 0.82);
+  border-color: rgba(191, 232, 138, 0.62);
+}
+
+.fairy-garden-scene {
+  border-color: rgba(191, 232, 138, 0.24);
+  background:
+    linear-gradient(180deg, rgba(222, 246, 177, 0.1), rgba(12, 32, 21, 0.36)),
+    rgba(14, 45, 29, 0.72);
+}
+
+.fairy-garden-scene::before {
+  background:
+    linear-gradient(116deg, transparent 0 18%, rgba(244, 214, 126, 0.2) 25%, transparent 36%),
+    linear-gradient(132deg, transparent 0 48%, rgba(191, 232, 138, 0.18) 55%, transparent 66%),
+    radial-gradient(ellipse at 52% 86%, rgba(244, 214, 126, 0.23), transparent 46%),
+    radial-gradient(ellipse at 50% 108%, rgba(111, 191, 104, 0.52), transparent 60%);
+}
+
+.fairy-garden-stage {
+  border-color: rgba(191, 232, 138, 0.2);
+  background:
+    linear-gradient(115deg, transparent 0 16%, rgba(244, 214, 126, 0.16) 24%, transparent 34%),
+    linear-gradient(140deg, transparent 0 48%, rgba(191, 232, 138, 0.12) 56%, transparent 70%),
+    radial-gradient(ellipse at 42% 18%, rgba(191, 232, 138, 0.22), transparent 42%),
+    linear-gradient(180deg, rgba(32, 96, 54, 0.18), rgba(7, 24, 15, 0.42)),
+    url("assets/garden-vista.svg") center 58% / cover no-repeat;
+  box-shadow: inset 0 -70px 110px rgba(9, 30, 19, 0.32), inset 0 1px 0 rgba(255, 247, 232, 0.14);
+}
+
+.fairy-garden-stage::after {
+  background:
+    linear-gradient(90deg, transparent, rgba(244, 214, 126, 0.17) 38%, rgba(191, 232, 138, 0.18) 55%, transparent),
+    repeating-linear-gradient(110deg, rgba(255, 247, 232, 0.06) 0 2px, transparent 2px 16px);
+  opacity: 0.9;
+}
+
+.giant-leaf {
+  border-color: rgba(191, 232, 138, 0.32);
+  background: linear-gradient(135deg, rgba(111, 191, 104, 0.94), rgba(34, 105, 60, 0.95) 58%, rgba(20, 63, 40, 0.96));
+  box-shadow: inset 0 -10px 20px rgba(10, 40, 22, 0.28), 0 0 24px rgba(191, 232, 138, 0.08);
+}
+
+.garden-object-label {
+  border-color: rgba(191, 232, 138, 0.34);
+  background:
+    linear-gradient(180deg, rgba(222, 246, 177, 0.12), rgba(255, 247, 232, 0.03)),
+    rgba(7, 22, 13, 0.92);
+}
+
+.garden-object::before {
+  background: radial-gradient(circle, rgba(191, 232, 138, 0.18), rgba(244, 214, 126, 0.08) 42%, transparent 68%);
+}
+
+.object-glow {
+  background: rgba(191, 232, 138, 0.26);
+  filter: blur(6px);
+}
+
+.firefly-dot {
+  background: #f4dc8d;
+  box-shadow: 0 0 14px rgba(244, 214, 126, 0.82), 0 0 26px rgba(191, 232, 138, 0.28);
+}
+
+.room-hero::before {
+  background:
+    linear-gradient(112deg, rgba(244, 214, 126, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(191, 232, 138, 0.11), transparent 54%);
+}
+
+.today-rhythm-strip .done,
+.room-status-chip.done,
+.room-status-chip.status-saved,
+.room-status-chip.status-ready,
+.status-ready .garden-object-status,
+.status-saved .garden-object-status {
+  color: #dff5ad;
+  border-color: rgba(191, 232, 138, 0.42);
+  background: rgba(111, 191, 104, 0.16);
+}
