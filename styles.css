@@ -9798,3 +9798,27 @@ button:focus-visible,
   border-color: rgba(191, 232, 138, 0.42);
   background: rgba(111, 191, 104, 0.16);
 }
+
+.story-restart-panel {
+  border-color: rgba(191, 232, 138, 0.28);
+  background:
+    linear-gradient(118deg, rgba(244, 214, 126, 0.13), transparent 34%),
+    linear-gradient(180deg, rgba(222, 246, 177, 0.09), rgba(255, 247, 232, 0.025)),
+    rgba(13, 39, 25, 0.82);
+}
+
+.story-restart-panel > div:first-child {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.story-restart-panel .action-row {
+  margin-top: 0.4rem;
+}
+
+.story-restart-panel .local-save-grid article:first-child {
+  border-color: rgba(191, 232, 138, 0.38);
+  background:
+    linear-gradient(180deg, rgba(191, 232, 138, 0.12), rgba(255, 247, 232, 0.028)),
+    rgba(8, 25, 15, 0.58);
+}

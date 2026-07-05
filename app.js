@@ -642,6 +642,7 @@
       gardenObjectPositions: defaultGardenObjectPositions(),
       enabledGardenObjects: defaultStarterGardenObjects(),
       hasChosenGardenObjects: false,
+      storyReplayMode: false,
       gardenPlacementMode: false,
       selectedGardenObjectId: "card-altar",
       activeGardenObjectId: "",
@@ -1494,6 +1495,7 @@
       var existingGardenObjects = !!parsed.player || parsed.hasSeenGardenIntro === true;
       parsed.enabledGardenObjects = normalizeEnabledGardenObjects(parsed.enabledGardenObjects || {}, existingGardenObjects);
       parsed.hasChosenGardenObjects = typeof parsed.hasChosenGardenObjects === "boolean" ? parsed.hasChosenGardenObjects : existingGardenObjects;
+      parsed.storyReplayMode = parsed.storyReplayMode === true;
       parsed.gardenPlacementMode = parsed.gardenPlacementMode === true;
       parsed.selectedGardenObjectId = gardenObjectById(parsed.selectedGardenObjectId) ? parsed.selectedGardenObjectId : "card-altar";
       parsed.activeGardenObjectId = gardenObjectById(parsed.activeGardenObjectId) ? parsed.activeGardenObjectId : "";
@@ -3053,7 +3055,8 @@
       state.gardenSettled = false;
       state.today = null;
     }
-    if (!state.player) state.screen = "creation";
+    if (state.storyReplayMode) state.screen = "creation";
+    else if (!state.player) state.screen = "creation";
     else if (!state.hasChosenGardenObjects) state.screen = "gardenSetup";
     else state.screen = "garden";
     saveState();
@@ -3073,6 +3076,20 @@
   function replayGardenIntro() {
     state.gardenIntroStep = 0;
     state.screen = "gardenIntro";
+    saveState();
+    render();
+  }
+
+  function restartStorybook() {
+    state.storyReplayMode = true;
+    state.introStep = 0;
+    state.gardenIntroStep = 0;
+    state.roomTransitionId = "";
+    state.gardenPlacementMode = false;
+    state.ritualSession = createRitualSession();
+    state.draft = fairyPreviewDraft();
+    state.settingsMessage = "The beginning is ready to replay. Your readings, pages, garden rooms, and private notes are still here.";
+    state.screen = "intro";
     saveState();
     render();
   }
@@ -3291,11 +3308,11 @@
   }
 
   function renderOnboardingControls() {
-    return '<section class="content-panel onboarding-controls"><div><p class="eyebrow">Beginnings</p><h2>Revisit the first path without losing the garden.</h2><p>The opening scenes, potion gate, and fairy design can be revisited whenever the sanctuary wants a different shape.</p></div>' +
+    return '<section class="content-panel onboarding-controls story-restart-panel"><div><p class="eyebrow">Beginnings</p><h2>Revisit the first path without losing the garden.</h2><p>The opening scenes, potion gate, and fairy design can be replayed like a storybook. Your tarot history, journal pages, garden rooms, and private notes remain saved.</p><div class="action-row"><button class="primary" data-action="restart-storybook">Replay Beginning</button></div></div>' +
       '<div class="local-save-grid">' +
-        '<article><span>Opening</span><strong>Before the Garden</strong><p>Return to the first story beat.</p><button class="ghost" data-action="replay-opening-intro">Replay opening</button></article>' +
-        '<article><span>Potion</span><strong>The Ivy Gate</strong><p>Revisit the witch, potion, and becoming fairy-sized.</p><button class="ghost" data-action="replay-garden-intro">Replay potion gate</button></article>' +
-        '<article><span>Fairy</span><strong>Moon Pond Mirror</strong><p>Adjust your fairy without erasing readings or pages.</p><button class="ghost" data-action="nav" data-screen="creation">Design fairy</button></article>' +
+        '<article><span>Safe replay</span><strong>Intro + Potion + Fairy</strong><p>Starts at the witchy opening line, passes through the Thimblemoon Potion, then opens fairy design.</p><button class="ghost" data-action="restart-storybook">Replay beginning</button></article>' +
+        '<article><span>Potion only</span><strong>The Ivy Gate</strong><p>Revisit the witch, potion, and becoming fairy-sized without changing your fairy.</p><button class="ghost" data-action="replay-garden-intro">Replay potion gate</button></article>' +
+        '<article><span>Fairy only</span><strong>Moon Pond Mirror</strong><p>Adjust your fairy without erasing readings, pages, or garden progress.</p><button class="ghost" data-action="nav" data-screen="creation">Design fairy</button></article>' +
       '</div></section>';
   }
 
@@ -3447,7 +3464,8 @@
 
   function renderCreation() {
     var draft = normalizeDraft(state.draft);
-    var creationActionLabel = !state.player ? "Choose Garden Places" : (state.hasSeenGardenIntro ? "Begin Day " + state.day : "Find the Garden");
+    var creationActionLabel = state.storyReplayMode ? "Return to Garden" : (!state.player ? "Choose Garden Places" : (state.hasSeenGardenIntro ? "Begin Day " + state.day : "Find the Garden"));
+    var secondaryAction = state.storyReplayMode || state.player ? '<button class="ghost" data-action="nav" data-screen="garden">Return to Garden</button>' : '<button class="ghost" data-action="reset-save">Start over</button>';
     var chart = draft.chart;
     var sun = signStyles[chart.sun];
     var moon = signStyles[chart.moon];
@@ -3467,7 +3485,7 @@
         '<div class="inline-actions"><button data-action="refresh-chart">Let the garden choose</button><button data-action="apply-stars">Let the signs dress me</button></div>' +
         '<div class="chart-summary">' + chartRow("Sun", chart.sun, sun.palette + ". " + sun.magic + ".") + chartRow("Moon", chart.moon, moon.aura + ". " + moon.garden) + chartRow("Rising", chart.rising, rising.outfitName + ". " + rising.palette + ".") + '</div>' +
         renderCustomizer(draft) +
-        '<div class="action-row"><button class="primary" data-action="finish-creation">' + escapeHtml(creationActionLabel) + '</button><button class="ghost" data-action="reset-save">Start over</button></div>' +
+        '<div class="action-row"><button class="primary" data-action="finish-creation">' + escapeHtml(creationActionLabel) + '</button>' + secondaryAction + '</div>' +
       '</section>' +
     '</section>';
     if (!state.player) return '<div class="shell"><main class="main-stage">' + content + '</main></div>';
@@ -5705,6 +5723,7 @@
 
     if (action === "finish-creation") {
       var firstCreation = !state.player;
+      var wasStoryReplay = state.storyReplayMode === true;
       updateDraftFromInputs();
       if (!state.draft.name.trim()) state.draft.name = "Little Fern";
       syncDraftChartFromMode();
@@ -5722,13 +5741,15 @@
         }
       };
       state.garden.push(signStyles[state.player.chart.sun].garden);
-      state.today = null;
-      state.gardenSettled = false;
+      state.storyReplayMode = false;
       if (firstCreation) {
+        state.today = null;
+        state.gardenSettled = false;
         state.hasChosenGardenObjects = false;
         state.enabledGardenObjects = normalizeEnabledGardenObjects(state.enabledGardenObjects || defaultStarterGardenObjects(), false);
         state.screen = "gardenSetup";
       } else {
+        if (wasStoryReplay) addGardenFeedback("garden", "The beginning was replayed, and the fairy returned with the garden still intact.", "garden");
         state.screen = state.hasSeenGardenIntro ? "garden" : "gardenIntro";
       }
       saveState();
@@ -5741,6 +5762,7 @@
       var target = button.dataset.screen;
       if (target === "tea" && !state.today && canBeginFreshDailyRitual()) { startNewDay("tea"); return; }
       if (target === "garden" && state.screen === "gardenRituals") state.ritualSession = createRitualSession();
+      if (target === "garden" && state.storyReplayMode) state.storyReplayMode = false;
       state.roomTransitionId = "";
       state.screen = target;
     }
@@ -5992,6 +6014,7 @@
 
     if (action === "advance-garden-intro") { advanceGardenIntro(); return; }
     if (action === "skip-garden-intro") { completeGardenIntro(); return; }
+    if (action === "restart-storybook") { restartStorybook(); return; }
     if (action === "replay-opening-intro") { state.introStep = 0; state.screen = "intro"; saveState(); render(); return; }
     if (action === "replay-garden-intro") { replayGardenIntro(); return; }
     if (action === "begin-tarot-draw") { beginTarotDraw(); return; }
