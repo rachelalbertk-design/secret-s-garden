@@ -35,6 +35,16 @@ If Node is available, you can run a syntax check:
 npm run check
 ```
 
+## Install As An App
+
+The prototype now includes web app metadata, install icons, and a service worker. After it is published on GitHub Pages, visitors can install it from their browser:
+
+- On desktop Chrome or Edge, use the install icon in the address bar.
+- On iPhone or iPad, open the Share menu and choose `Add to Home Screen`.
+- On Android, open the browser menu and choose `Install app` or `Add to Home screen`.
+
+After the first visit, the main app shell is cached so the garden can reopen more smoothly. Private entries still stay local to the player's browser/device.
+
 ## Publish On GitHub Pages
 
 This repository is ready to publish from the root folder:

@@ -5,15 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="A local-only fairy garden prototype for tarot, astrology, journaling, gentle rituals, and daily reflection.">
   <meta name="theme-color" content="#12221c">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Secret's Garden">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta property="og:title" content="The Secret's Garden">
   <meta property="og:description" content="A local-only fairy garden prototype where the garden is the home base.">
   <meta property="og:type" content="website">
   <title>The Secret's Garden</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/app-icon-192.png">
+  <link rel="apple-touch-icon" href="assets/app-icon-192.png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div id="app" class="app" aria-live="polite"></div>
   <noscript>The Secret's Garden needs JavaScript enabled to open the gate.</noscript>
   <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("./service-worker.js").catch(function () {});
+      });
+    }
+  </script>
 </body>
 </html>

@@ -1,0 +1,32 @@
+{
+  "name": "The Secret's Garden",
+  "short_name": "Secret Garden",
+  "description": "A local-only fairy garden for tarot, astrology, journaling, gentle rituals, and daily reflection.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#12221c",
+  "background_color": "#12221c",
+  "categories": ["lifestyle", "games", "productivity"],
+  "icons": [
+    {
+      "src": "assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
