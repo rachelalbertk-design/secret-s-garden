@@ -3350,6 +3350,54 @@
     return renderGarden();
   }
 
+  function renderRoomHeader(objectId, title, copy, options) {
+    options = options || {};
+    var object = gardenObjectById(objectId);
+    var status = object ? gardenObjectStatus(object) : { label: "Open", tone: "quiet" };
+    var chips = options.chips || [];
+    var objectClass = object ? ' room-hero-' + escapeHtml(object.kind) + ' garden-object-' + escapeHtml(object.kind) : '';
+    var art = object ? renderGardenObjectArt(object) : '<span class="room-hero-sigil" aria-hidden="true">SG</span>';
+    var statusChip = object ? '<span class="room-status-chip status-' + escapeHtml(status.tone) + '">' + escapeHtml(status.label) + '</span>' : '';
+    var extraChips = chips.map(function (chip) {
+      return '<span class="room-status-chip ' + (chip.done ? 'done' : '') + '">' + escapeHtml(chip.label) + '</span>';
+    }).join("");
+    var action = options.action || '<button class="primary" data-action="nav" data-screen="garden">Return to Garden</button>';
+    var privacy = options.privacy ? '<div class="privacy-note">' + escapeHtml(options.privacy) + '</div>' : '';
+    return '<section class="content-panel room-hero' + objectClass + '">' +
+      '<div class="room-hero-object">' + art + '</div>' +
+      '<div class="room-hero-copy"><p class="eyebrow">' + escapeHtml(object ? object.name : "Garden Room") + '</p><h1>' + escapeHtml(title) + '</h1><p>' + escapeHtml(copy) + '</p>' + privacy + '<div class="room-status-row">' + statusChip + extraChips + '</div></div>' +
+      '<div class="room-hero-actions">' + action + '</div>' +
+    '</section>';
+  }
+
+  function renderPolishedEmptyState(label, title, copy, actionLabel, actionScreen) {
+    var action = actionLabel && actionScreen ? '<div class="action-row"><button class="primary" data-action="nav" data-screen="' + escapeHtml(actionScreen) + '">' + escapeHtml(actionLabel) + '</button></div>' : '';
+    return '<div class="polished-empty-state"><span>' + escapeHtml(label) + '</span><h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(copy) + '</p>' + action + '</div>';
+  }
+
+  function todayProgressItems() {
+    var chart = activeChart();
+    var card = currentCard();
+    var entry = privateEntryForDay(state.day);
+    var astrologyReading = currentStoredDailyAstrologyReading(chart);
+    var ritualCount = todayRitualLogs().length;
+    var lesson = currentDayLesson();
+    return [
+      { objectId: "card-altar", label: card ? "Card drawn" : "Card waiting", done: !!card },
+      { objectId: "observatory", label: astrologyReading ? "Sky saved" : "Sky ready", done: !!astrologyReading },
+      { objectId: "grimoire", label: entry ? "Page saved" : "Page open", done: !!entry },
+      { objectId: "tending-grove", label: ritualCount ? "Ritual tended" : "Ritual optional", done: ritualCount > 0 },
+      { objectId: "memory-tree", label: lesson ? "Leaf gathered" : "Leaf waiting", done: !!lesson }
+    ];
+  }
+
+  function renderTodayRhythmStrip() {
+    return '<div class="today-rhythm-strip" aria-label="Today\'s garden rhythm">' + todayProgressItems().map(function (item) {
+      var object = gardenObjectById(item.objectId);
+      return '<span class="' + (item.done ? 'done' : '') + '"><i aria-hidden="true"></i><strong>' + escapeHtml(object ? object.name : "Garden") + '</strong><small>' + escapeHtml(item.label) + '</small></span>';
+    }).join("") + '</div>';
+  }
+
 
   function enabledGardenObjectCount() {
     ensureGardenObjectStateShape();
@@ -3498,13 +3546,16 @@
   function renderTea() {
     if (!state.today && canBeginFreshDailyRitual()) startNewDay("tea");
     if (!state.today) {
-      var lockedContent = '<div class="tarot-room-layout"><section class="content-panel tarot-reading-panel"><p class="eyebrow">Card Altar</p><h2>The card has already spoken today.</h2><p>The deck rests until the next real-world day. Return to the garden when you are ready to choose another doorway.</p>' + renderDeckChoiceControl() + renderNextDrawCountdown(false) + '<div class="action-row"><button class="primary" data-action="nav" data-screen="garden">Return to Garden</button></div></section>' + renderCustomDeckWorkbench() + renderTarotReadingArchive() + renderDeckProofSetPanel() + renderFairyDeckGallery() + renderCardBloomNursery() + '</div>';
+      var lockedContent = '<div class="tarot-room-layout">' +
+        renderRoomHeader("card-altar", "The deck rests until tomorrow.", "One card may speak each real-world day. The altar keeps the reading local and lets the rest of the garden stay open.", { chips: [{ label: "Next draw timed", done: false }], privacy: "Tarot history stays on this device." }) +
+        '<section class="content-panel tarot-reading-panel"><p class="eyebrow">Card Altar</p><h2>The card has already spoken today.</h2><p>The deck rests until the next real-world day. Return to the garden when you are ready to choose another doorway.</p>' + renderDeckChoiceControl() + renderNextDrawCountdown(false) + '<div class="action-row"><button class="primary" data-action="nav" data-screen="garden">Return to Garden</button></div></section>' + renderCustomDeckWorkbench() + renderTarotReadingArchive() + renderDeckProofSetPanel() + renderFairyDeckGallery() + renderCardBloomNursery() + '</div>';
       return renderShell(lockedContent, "tea");
     }
     state.today = normalizeToday(state.today);
     var card = currentCard();
     var drawState = state.today.drawState || (card ? "revealed" : "idle");
     var content = '<div class="tarot-room-layout">' +
+      renderRoomHeader("card-altar", card ? card.name + " is on the altar." : "Let one card speak for the day.", card ? "Today's reading is open here. When you are done, return to the garden and choose another doorway." : "The altar is a quiet room for drawing, reading, and shaping your local fairy deck.", { chips: [{ label: card ? "Reading saved today" : "Card ready", done: !!card }], privacy: "One card per real-world day. No account, tracking, or backend." }) +
       '<section class="play-grid tarot-table-grid">' +
         '<aside class="content-panel tarot-table-panel">' + renderTarotTable(card, drawState) + '</aside>' +
         '<section class="content-panel tarot-reading-panel">' + renderTarotInfo(card, drawState) + '</section>' +
@@ -3527,7 +3578,7 @@
       var cardName = reading.cardName || entry.cardName || "Saved reading";
       var meaning = reading.meaning || reading.cardDescription || "A local reading page is resting here.";
       return '<article><span>Day ' + escapeHtml(entry.day || "?") + '</span><strong>' + escapeHtml(cardName) + '</strong><p>' + escapeTarotText(meaning) + '</p></article>';
-    }).join("") : '<p class="small">Saved readings will appear here after the first card draw. Nothing leaves this device.</p>';
+    }).join("") : renderPolishedEmptyState("Archive", "No readings saved yet.", "Draw a daily card when you are ready. The first reading will press itself into this local altar archive.", "Return to Garden", "garden");
     return '<section class="content-panel tarot-reading-archive"><div class="section-heading"><div><p class="eyebrow">Tarot Readings</p><h2>The altar keeps the cards close.</h2></div><span class="small">Local archive</span></div><div class="reading-archive-list">' + todayPanel + archive + '</div></section>';
   }
 
@@ -3636,7 +3687,7 @@
       return '<p class="eyebrow">Card Altar</p>' + renderDeckChoiceControl() + '<h2>The deck is alive.</h2><p>The cards slide, weave, and return to one another. Nothing has been chosen yet.</p><div class="soundscape"><span>paper sliding</span><span>soft wood</span><span>distant wind</span><span>tiny bells</span></div><div class="action-row"><button class="primary" data-action="complete-tarot-draw">Choose this moment</button></div>';
     }
     if (!card) {
-      return '<p class="eyebrow">Card Altar</p>' + renderDeckChoiceControl() + '<h2>The deck waits on the stone.</h2><p>The witch lowers her voice. The garden grows quiet around the table, but the leaves still breathe.</p><div class="action-row"><button class="primary" data-action="begin-tarot-draw">Draw Today&#39;s Card</button></div><p class="small">One card may speak each real-world day.</p>';
+      return '<p class="eyebrow">Card Altar</p>' + renderDeckChoiceControl() + '<h2>The deck waits on the stone.</h2><p>The witch lowers her voice. The garden grows quiet around the table, but the leaves still breathe.</p>' + renderPolishedEmptyState("Ready", "No card has turned yet.", "When you draw, the reading will connect to the Observatory, Grimoire, and Memory Tree for today.", "Draw Today's Card", "tea").replace('data-action="nav" data-screen="tea"', 'data-action="begin-tarot-draw"') + '<p class="small">One card may speak each real-world day.</p>';
     }
     var revealing = drawState === "revealing";
     return '<p class="eyebrow">Today&#39;s Card</p>' + renderDeckChoiceControl() +
@@ -4108,8 +4159,11 @@
     var ritualBody = latestRitual ? (latestRitual.title + " worked through " + latestRitual.gardenMetaphor + ".") : "No Tending Grove ritual has been saved today.";
     var ritualDetail = latestLog ? compactSummaryText(latestLog.note || latestLog.selectedSensations.join(", ") || latestLog.selectedBodyArea, ritualLogs.length + " ritual note" + (ritualLogs.length === 1 ? "" : "s") + " saved today.") : "Ritual work is optional; the tree records only what you choose to save.";
     var gatheredClass = currentLesson && state.selectedDayLessonId === currentLesson.id ? ' gathered' : '';
+    var emptyPrompt = dailySummaryHasMaterial() ? '' : '<section class="content-panel">' + renderPolishedEmptyState("Memory Tree", "No traces gathered yet.", "Visit any room when you are ready: a card, sky reading, Grimoire page, or ritual note can give the tree something gentle to summarize.", "Return to Garden", "garden") + '</section>';
     var content = '<section class="day-summary-room' + gatheredClass + '">' +
+      renderRoomHeader("memory-tree", currentLesson ? "Today's leaf is saved." : "Gather the day's lesson when it is ready.", "The Memory Tree pulls together tarot, feelings, astrology, and ritual work into one local day summary.", { chips: [{ label: card ? "Tarot present" : "Tarot open", done: !!card }, { label: entry ? "Journal present" : "Journal optional", done: !!entry }, { label: ritualLogs.length ? "Ritual present" : "Ritual optional", done: ritualLogs.length > 0 }], privacy: "Gathering a leaf does not publish, sync, or delete private writing." }) +
       '<section class="content-panel day-summary-hero"><div class="memory-tree-visual" aria-hidden="true"><span></span><span></span><span></span><span></span></div><div><p class="eyebrow">Memory Tree</p><h1>Today&apos;s lessons gather here.</h1><p>' + escapeHtml(dailySummaryLesson(card, entry, ritualLogs, astrologyReading)) + '</p><div class="privacy-note">Gather Today saves a local summary leaf. It does not publish, sync, or delete your private writing.</div><div class="action-row"><button class="primary" data-action="gather-day-lesson">' + escapeHtml(gatherLabel) + '</button><button class="ghost" data-action="nav" data-screen="garden">Return to Garden</button></div></div></section>' +
+      emptyPrompt +
       (currentLesson ? '<section class="content-panel today-leaf-panel"><div class="today-leaf-ceremony" aria-hidden="true"><span></span><span></span><span></span></div><div class="section-heading"><div><p class="eyebrow">Today&apos;s Leaf</p><h2>Saved in the branches.</h2></div><span class="small">' + escapeHtml(localTimeLabel(currentLesson.updatedAt)) + '</span></div>' + renderDayLessonLeaf(currentLesson, "current") + '</section>' : '') +
       '<section class="day-summary-grid">' +
         renderDaySummaryCard("Tarot", card ? card.name : "Waiting for the card", cardBody, cardDetail) +
@@ -4124,11 +4178,11 @@
 
   function gardenObjectStatus(object) {
     if (!object) return { label: "Open", tone: "quiet" };
-    if (object.id === "card-altar") return canDrawDailyCard() ? { label: "Reading ready", tone: "ready" } : { label: "Resting", tone: "resting" };
+    if (object.id === "card-altar") return currentCard() ? { label: "Card drawn today", tone: "saved" } : (canDrawDailyCard() ? { label: "Reading ready", tone: "ready" } : { label: "Resting", tone: "resting" });
     if (object.id === "observatory") return currentStoredDailyAstrologyReading(activeChart()) ? { label: "Today's sky saved", tone: "saved" } : { label: "Daily sky ready", tone: "ready" };
     if (object.id === "grimoire") return (state.privateEntries || []).some(function (entry) { return entry.day === state.day; }) ? { label: "Page saved today", tone: "saved" } : { label: "Fresh page", tone: "ready" };
-    if (object.id === "tending-grove") return (state.ritualLogs || []).length ? { label: "Grove remembers", tone: "saved" } : { label: "Gentle ritual", tone: "ready" };
-    if (object.id === "memory-tree") return dailySummaryHasMaterial() ? { label: "Day gathered", tone: "saved" } : { label: "Waiting for traces", tone: "ready" };
+    if (object.id === "tending-grove") return todayRitualLogs().length ? { label: "Tended today", tone: "saved" } : { label: "Gentle ritual", tone: "ready" };
+    if (object.id === "memory-tree") return currentDayLesson() ? { label: "Leaf gathered", tone: "saved" } : (dailySummaryHasMaterial() ? { label: "Ready to gather", tone: "ready" } : { label: "Waiting for traces", tone: "quiet" });
     return { label: "Open", tone: "quiet" };
   }
 
@@ -4158,7 +4212,7 @@
     return '<section class="fairy-garden-scene' + placementClass + '" aria-label="Fairy-sized garden">' +
       '<div class="garden-scene-heading"><div><p class="eyebrow">Fairy-sized Garden</p><h1>The garden is small enough to enter.</h1></div><div class="garden-scene-controls">' + placementStatus + placementButton + settingsButton + '</div></div>' +
       '<div class="fairy-garden-stage" data-garden-section="scene">' + renderGardenSceneAtmosphere() + renderGardenPlacementGrid() + renderGardenObjects() + renderGardenFirstHint() + renderGardenDoorwayTransition(transitionObject) + '</div>' +
-      '<div class="garden-scene-status"><div class="garden-scene-copy"><p class="eyebrow">Today in the garden</p><h2>' + escapeHtml(status.title) + '</h2><p>' + escapeHtml(status.text) + '</p></div><div class="loop-status"><div><span>Today&#39;s step</span><strong>' + escapeHtml(status.title) + '</strong></div>' + rewardLine + '</div>' + (card ? renderTarotGameplayImpact(card, "compact") : '') + renderGardenRewardBanner() + renderGardenFeedbackTrail() + renderNextDrawCountdown(true) + gardenDoorwayNote + '<p class="small privacy-line">No account. No ads. No tracking. Your garden keeps its save on this device.</p></div>' +
+      '<div class="garden-scene-status"><div class="garden-scene-copy"><p class="eyebrow">Today in the garden</p><h2>' + escapeHtml(status.title) + '</h2><p>' + escapeHtml(status.text) + '</p></div><div class="loop-status"><div><span>Today&#39;s step</span><strong>' + escapeHtml(status.title) + '</strong></div>' + rewardLine + '</div>' + renderTodayRhythmStrip() + (card ? renderTarotGameplayImpact(card, "compact") : '') + renderGardenRewardBanner() + renderGardenFeedbackTrail() + renderNextDrawCountdown(true) + gardenDoorwayNote + '<p class="small privacy-line">No account. No ads. No tracking. Your garden keeps its save on this device.</p></div>' +
     '</section>';
   }
 
@@ -4772,7 +4826,7 @@
   }
 
   function renderJournalEntryDetail(entry) {
-    if (!entry) return '<section class="content-panel journal-entry-detail empty"><p class="eyebrow">Shelf of days</p><h2>No page selected.</h2><p>Choose a saved page from the shelf, or start a fresh page.</p></section>';
+    if (!entry) return '<section class="content-panel journal-entry-detail empty">' + renderPolishedEmptyState("Shelf of days", "No page selected.", "Choose a saved page from the shelf, or start a fresh page when you want the garden to remember something.", "Start a New Page", "private").replace('data-action="nav" data-screen="private"', 'data-action="journal-view" data-view="new"') + '</section>';
     var promises = entry.smallPromises && entry.smallPromises.length ? '<div><span>Small promises</span><p>' + escapeHtml(entry.smallPromises.join(', ')) + '</p></div>' : '';
     var body = (entry.bodySnapshot && entry.bodySnapshot.length) || entry.bodyMessage ? '<div><span>Body notes</span><p>' + escapeHtml((entry.bodySnapshot || []).join(', ') || 'Quiet note') + (entry.bodyMessage ? '<br>' + escapeHtml(entry.bodyMessage) : '') + '</p></div>' : '';
     var cycle = entry.cycleSignals && entry.cycleSignals.length || entry.cycleNotes ? '<div><span>Cycle notes</span><p>' + escapeHtml((entry.cycleSignals || []).join(', ') || 'Noted privately') + (entry.cycleNotes ? '<br>' + escapeHtml(entry.cycleNotes) : '') + '</p></div>' : '';
@@ -4787,7 +4841,7 @@
   function renderJournalArchive(meta, entries) {
     var selected = entries.find(function (entry) { return entry.id === state.selectedPrivateEntryId; }) || entries[entries.length - 1] || null;
     if (selected) state.selectedPrivateEntryId = selected.id;
-    var list = entries.length ? renderJournalShelfGroups(entries, selected) : '<p class="small">No private pages written yet.</p>';
+    var list = entries.length ? renderJournalShelfGroups(entries, selected) : renderPolishedEmptyState("Shelf", "No private pages yet.", "When you save today's Grimoire page, it will appear here without leaving this device.", "Start Today's Page", "private").replace('data-action="nav" data-screen="private"', 'data-action="journal-view" data-view="new"');
     return '<section class="book-grid journal-archive-room"><aside class="side-panel journal-shelf"><p class="eyebrow">' + escapeHtml(meta.object) + '</p><h2>Past journals</h2><p>Read what the garden has kept on this device.</p><div class="journal-room-actions"><button class="primary" data-action="journal-view" data-view="new">Start a new page</button><button class="ghost" data-action="journal-view" data-view="menu">Grimoire menu</button></div><div class="journal-list journal-shelf-list">' + list + '</div><div class="action-row">' + (entries.length ? '<button class="ghost" data-action="remove-latest-private-page">Remove latest private page</button>' : '') + '</div></aside>' + renderJournalEntryDetail(selected) + '</section>';
   }
 
@@ -4800,7 +4854,9 @@
     var draft = state.privateDraft;
     var entries = (state.privateEntries || []).map(normalizePrivateEntry);
     var view = journalView();
-    var content = view === "new" ? renderJournalNewPage(meta, draft, room) : (view === "archive" ? renderJournalArchive(meta, entries) : renderJournalMenu(meta, entries));
+    var todaysEntry = privateEntryForDay(state.day);
+    var header = renderRoomHeader("grimoire", view === "archive" ? "The shelf keeps what you wrote." : (todaysEntry ? "Continue today's page." : "Open only the drawers you need."), view === "new" ? "Mood, intentions, habits, body notes, cycle notes, and free writing all save under the same day." : "The Grimoire starts at a simple menu: begin today, or revisit past pages.", { chips: [{ label: todaysEntry ? "Today saved" : "Today open", done: !!todaysEntry }, { label: entries.length + " page" + (entries.length === 1 ? "" : "s"), done: entries.length > 0 }], privacy: "Journal writing stays local to this browser unless you export it yourself." });
+    var content = header + (view === "new" ? renderJournalNewPage(meta, draft, room) : (view === "archive" ? renderJournalArchive(meta, entries) : renderJournalMenu(meta, entries)));
     return renderShell(content, "private");
   }
 
@@ -5195,8 +5251,8 @@
       '<section class="content-panel ritual-menu-intro"><div><p class="eyebrow">Tending Grove</p><h1>What kind of tending would help?</h1><p>Garden Rituals are short, optional moments for noticing, naming, and tending through garden metaphors. You can stop anytime.</p><div class="privacy-note">Private by default. Saved ritual notes and resources stay on this device.</div></div><div class="ritual-grove-visual" aria-hidden="true"><span></span><span></span><span></span></div></section>' +
       '<section class="ritual-card-grid">' + ritualRegistry.map(renderRitualCard).join("") + '</section>' +
       '<section class="ritual-side-grid">' +
-        '<article class="content-panel ritual-log-panel"><div class="section-heading"><div><p class="eyebrow">Private Ritual Log</p><h2>Recent tending</h2></div><span class="small">' + escapeHtml(String(state.ritualLogs.length)) + ' saved</span></div>' + (recent.length ? recent.map(renderRitualLogEntry).join("") : '<p class="small">No ritual notes saved yet.</p>') + '</article>' +
-        '<article class="content-panel ritual-resource-panel"><div class="section-heading"><div><p class="eyebrow">Resource Grove</p><h2>What supports you</h2></div><span class="small">' + escapeHtml(String(state.gardenResources.length)) + ' planted</span></div>' + (resources.length ? resources.map(renderGardenResourceItem).join("") : '<p class="small">Resources planted through Resource Grove will appear here.</p>') + '</article>' +
+        '<article class="content-panel ritual-log-panel"><div class="section-heading"><div><p class="eyebrow">Private Ritual Log</p><h2>Recent tending</h2></div><span class="small">' + escapeHtml(String(state.ritualLogs.length)) + ' saved</span></div>' + (recent.length ? recent.map(renderRitualLogEntry).join("") : renderPolishedEmptyState("Log", "No rituals saved yet.", "The grove does not need a streak. Save a note only when a ritual gives you something worth keeping.")) + '</article>' +
+        '<article class="content-panel ritual-resource-panel"><div class="section-heading"><div><p class="eyebrow">Resource Grove</p><h2>What supports you</h2></div><span class="small">' + escapeHtml(String(state.gardenResources.length)) + ' planted</span></div>' + (resources.length ? resources.map(renderGardenResourceItem).join("") : renderPolishedEmptyState("Resources", "Nothing planted yet.", "Support notes appear here only if you choose the Resource Grove ritual and save one.")) + '</article>' +
       '</section>' +
     '</section>';
   }
@@ -5224,7 +5280,10 @@
     else if (session.mode === "reflection") content = renderRitualReflection();
     else if (session.mode === "consent" || session.mode === "runner") content = renderRitualRunner();
     else content = renderRitualMenu();
-    return renderShell(content, "gardenRituals");
+    var activeRitual = ritualById(session.ritualId);
+    var logsToday = todayRitualLogs().length;
+    var header = renderRoomHeader("tending-grove", activeRitual ? activeRitual.title : "Choose a gentle tending ritual.", activeRitual ? "This room can be paused, skipped, or returned from at any point. The garden keeps only what you choose to save." : "The grove offers short optional rituals for roots, weather, resources, lanterns, leaves, care, and gentle gates.", { chips: [{ label: logsToday ? logsToday + " saved today" : "Optional today", done: logsToday > 0 }, { label: "Pause anytime", done: true }], privacy: "Ritual notes stay private and local to this device." });
+    return renderShell(header + content, "gardenRituals");
   }
 
   function renderRitualRunner() {
@@ -5377,6 +5436,7 @@
       saveState();
     }
     var content = '<div class="astrology-layout">' +
+      renderRoomHeader("observatory", "Today's sky is caught in the glass.", "The Observatory gives a local daily astrology-style reading using the fairy chart you chose. It does not need birth time, place, accounts, or tracking.", { chips: [{ label: hadDailyReading ? "Sky already saved" : "Sky just saved", done: true }, { label: card ? "Tarot braided" : "Tarot optional", done: !!card }], privacy: "These readings are cozy game text stored only in this browser." }) +
       '<section class="content-panel astrology-intro"><p class="eyebrow">Astrology + Readings</p><h1>Sky readings</h1><p>Your signs are used as cozy game language, not a calculation engine. They shape fairy style, garden mood, and how today&#39;s tarot card is read in the observatory.</p><div class="privacy-note">Local-first. No birth date, time, or place is required.</div></section>' +
       renderGardenAlmanac() +
       renderDailyAstrologyReadingPanel(dailyReading, card) +
