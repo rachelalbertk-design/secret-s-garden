@@ -7283,7 +7283,7 @@ body {
 }
 
 .garden-scene-status {
-  align-items: stretch;
+  align-items: start;
 }
 
 .garden-loop-card,
@@ -7877,7 +7877,19 @@ button,
 .garden-scene-status {
   grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
   gap: 0.85rem;
+  align-items: start;
   margin-top: 0.75rem;
+}
+
+.garden-scene-status > .today-rhythm-strip,
+.garden-scene-status > .tarot-gameplay-impact,
+.garden-scene-status > .garden-reward-banner,
+.garden-scene-status > .garden-feedback-trail,
+.garden-scene-status > .draw-countdown,
+.garden-scene-status > .action-row,
+.garden-scene-status > .garden-doorway-note,
+.garden-scene-status > .privacy-line {
+  grid-column: 1 / -1;
 }
 
 .garden-scene-copy h2 {
@@ -9479,19 +9491,23 @@ textarea::placeholder {
 }
 
 .today-rhythm-strip {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 0.55rem;
-  margin-top: 0.85rem;
+  grid-column: 1 / -1;
+  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.35rem;
 }
 
 .today-rhythm-strip span {
+  flex: 1 1 136px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.2rem 0.45rem;
+  gap: 0.12rem 0.42rem;
   align-items: center;
-  min-height: 64px;
-  padding: 0.55rem;
+  align-self: start;
+  min-height: 46px;
+  padding: 0.42rem 0.5rem;
   border: 1px solid rgba(255, 247, 232, 0.13);
   border-radius: 8px;
   background: rgba(255, 247, 232, 0.045);
@@ -9509,7 +9525,8 @@ textarea::placeholder {
 .today-rhythm-strip strong,
 .today-rhythm-strip small {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .today-rhythm-strip strong {

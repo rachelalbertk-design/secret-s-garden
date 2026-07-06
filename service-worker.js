@@ -1,9 +1,9 @@
-const CACHE_NAME = "the-secrets-garden-v4";
+const CACHE_NAME = "the-secrets-garden-v5";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
-  "./styles.css?v=20260704-replay",
+  "./styles.css?v=20260706-ui-fix",
   "./app.js",
   "./app.js?v=20260704-replay",
   "./manifest.webmanifest",
